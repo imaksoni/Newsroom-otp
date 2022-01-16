@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
+import com.newsroom.otp.model.Mail;
 import com.newsroom.otp.model.Mob;
 import com.newsroom.otp.model.OTP;
 import com.newsroom.otp.service.OtpService;
@@ -46,7 +47,26 @@ public class OtpController {
 
 	}
 
-	@PostMapping("/verifyPhoneOtp")
+	@PostMapping("/mailOtp")
+	public ResponseEntity<String> sendMailOtp(@RequestHeader Map<String, String> headers, @RequestBody Mail mail)
+			throws Exception {
+
+		String userID = headers.get(USER_ID);
+		String toMail = mail.getMail();
+
+		System.out.println(headers);
+
+		log.info("Request: Send OTP for userID: {}, Mail: {}", userID, toMail);
+
+		service.sendMailOtp(userID, toMail);
+
+		log.info("Response: Sent OTP for userID: {}, Mail: {}", userID, toMail);
+
+		return new ResponseEntity<String>("SUCCESS", HttpStatus.ACCEPTED);
+
+	}
+
+	@PostMapping({"/verifyPhoneOtp","/verifyMailOtp"})
 	public ResponseEntity<String> verifyPhoneOtp(@RequestHeader Map<String, String> headers, @RequestBody OTP otp)
 			throws Exception {
 
@@ -55,7 +75,7 @@ public class OtpController {
 
 		log.info("Request: Verify OTP for userID: {}", userID);
 
-		boolean status = service.verifyPhoneOtp(userID, oTP);
+		boolean status = service.verifyOtp(userID, oTP);
 
 		log.info("Response: Verify OTP for userID: {}", userID);
 
